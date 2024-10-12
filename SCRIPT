@@ -26,7 +26,6 @@ OrionLib:MakeNotification({
 })
 
 --[[================= Teleport Tool =================]]--
-
 Tab:AddButton({
     Name = "Teleport Tool",
     Callback = function()
@@ -45,13 +44,19 @@ Tab:AddButton({
             end
         end
 
+        local isEquipped = false
+
         tool.Equipped:Connect(function()
+            isEquipped = true
+
             mouse.Button1Down:Connect(function()
-                teleportToPosition(mouse.Hit.p)
+                if isEquipped then
+                    teleportToPosition(mouse.Hit.p)
+                end
             end)
 
             UIS.TouchTap:Connect(function(touchPositions, processedByUI)
-                if not processedByUI then
+                if not processedByUI and isEquipped then
                     local touchLocation = touchPositions[1]
                     local ray = workspace.CurrentCamera:ScreenPointToRay(touchLocation.X, touchLocation.Y)
                     local raycastResult = workspace:Raycast(ray.Origin, ray.Direction * 1000)
@@ -60,6 +65,10 @@ Tab:AddButton({
                     end
                 end
             end)
+        end)
+
+        tool.Unequipped:Connect(function()
+            isEquipped = false
         end)
 
         OrionLib:MakeNotification({
@@ -72,7 +81,6 @@ Tab:AddButton({
 })
 
 --[[================= Fly Tool =================]]--
-
 Tab:AddButton({
     Name = "Fly Tool",
     Callback = function()
@@ -81,7 +89,7 @@ Tab:AddButton({
         local flySpeed = 50
         local character = player.Character
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        
+
         local function fly()
             flying = true
             local bodyVelocity = Instance.new("BodyVelocity")
@@ -100,14 +108,26 @@ Tab:AddButton({
             humanoidRootPart:FindFirstChild("BodyVelocity"):Destroy()
         end
 
-        UIS.InputBegan:Connect(function(input)
-            if input.KeyCode == Enum.KeyCode.Space then
-                if flying then
-                    stopFlying()
-                else
-                    fly()
+        local isEquipped = false
+
+        tool.Equipped:Connect(function()
+            isEquipped = true
+            UIS.InputBegan:Connect(function(input)
+                if isEquipped then
+                    if input.KeyCode == Enum.KeyCode.Space then
+                        if flying then
+                            stopFlying()
+                        else
+                            fly()
+                        end
+                    end
                 end
-            end
+            end)
+        end)
+
+        tool.Unequipped:Connect(function()
+            isEquipped = false
+            stopFlying()  -- Ensure flying stops when tool is unequipped
         end)
 
         OrionLib:MakeNotification({
@@ -120,7 +140,6 @@ Tab:AddButton({
 })
 
 --[[================= God Mode =================]]--
-
 Tab:AddButton({
     Name = "God Mode",
     Callback = function()
@@ -141,7 +160,6 @@ Tab:AddButton({
 })
 
 --[[================= Invisibility =================]]--
-
 Tab:AddButton({
     Name = "Invisibility",
     Callback = function()
@@ -162,7 +180,6 @@ Tab:AddButton({
 })
 
 --[[================= Speed Boost =================]]--
-
 Tab:AddButton({
     Name = "Speed Boost",
     Callback = function()
@@ -179,7 +196,6 @@ Tab:AddButton({
 })
 
 --[[================= Teleport to Players =================]]--
-
 Tab:AddButton({
     Name = "Teleport to Player",
     Callback = function()
@@ -208,7 +224,6 @@ Tab:AddButton({
 })
 
 --[[================= Low Gravity =================]]--
-
 Tab:AddButton({
     Name = "Low Gravity",
     Callback = function()
@@ -222,3 +237,4 @@ Tab:AddButton({
         })
     end
 })
+
