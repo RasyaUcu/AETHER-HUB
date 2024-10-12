@@ -1,0 +1,224 @@
+local player = game.Players.LocalPlayer
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+
+local Window = OrionLib:MakeWindow({
+    Name = "Aether Hub",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "OrionTest"
+})
+
+local Tab = Window:MakeTab({
+    Name = "Player Tools",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+local Section = Tab:AddSection({
+    Name = "Player Modifications"
+})
+
+OrionLib:MakeNotification({
+    Name = "Welcome!",
+    Content = "Welcome to Aether Hub!",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+
+--[[================= Teleport Tool =================]]--
+
+Tab:AddButton({
+    Name = "Teleport Tool",
+    Callback = function()
+        local mouse = player:GetMouse()
+        local UIS = game:GetService("UserInputService")
+        local tool = Instance.new("Tool")
+        tool.Name = "Teleport Tool"
+        tool.RequiresHandle = false
+        tool.Parent = player.Backpack
+
+        local function teleportToPosition(position)
+            local character = player.Character
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                humanoidRootPart.CFrame = CFrame.new(position)
+            end
+        end
+
+        tool.Equipped:Connect(function()
+            mouse.Button1Down:Connect(function()
+                teleportToPosition(mouse.Hit.p)
+            end)
+
+            UIS.TouchTap:Connect(function(touchPositions, processedByUI)
+                if not processedByUI then
+                    local touchLocation = touchPositions[1]
+                    local ray = workspace.CurrentCamera:ScreenPointToRay(touchLocation.X, touchLocation.Y)
+                    local raycastResult = workspace:Raycast(ray.Origin, ray.Direction * 1000)
+                    if raycastResult then
+                        teleportToPosition(raycastResult.Position)
+                    end
+                end
+            end)
+        end)
+
+        OrionLib:MakeNotification({
+            Name = "Tool Given",
+            Content = "You received the Teleport Tool!",
+            Image = "rbxassetid://4483345998",
+            Time = 5
+        })
+    end
+})
+
+--[[================= Fly Tool =================]]--
+
+Tab:AddButton({
+    Name = "Fly Tool",
+    Callback = function()
+        local UIS = game:GetService("UserInputService")
+        local flying = false
+        local flySpeed = 50
+        local character = player.Character
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        
+        local function fly()
+            flying = true
+            local bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.MaxForce = Vector3.new(1000000, 1000000, 1000000)
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyVelocity.Parent = humanoidRootPart
+
+            while flying do
+                bodyVelocity.Velocity = Vector3.new(0, flySpeed, 0)
+                game:GetService("RunService").Heartbeat:Wait()
+            end
+        end
+
+        local function stopFlying()
+            flying = false
+            humanoidRootPart:FindFirstChild("BodyVelocity"):Destroy()
+        end
+
+        UIS.InputBegan:Connect(function(input)
+            if input.KeyCode == Enum.KeyCode.Space then
+                if flying then
+                    stopFlying()
+                else
+                    fly()
+                end
+            end
+        end)
+
+        OrionLib:MakeNotification({
+            Name = "Fly Mode",
+            Content = "Press Space to toggle Fly Mode!",
+            Image = "rbxassetid://4483345998",
+            Time = 5
+        })
+    end
+})
+
+--[[================= God Mode =================]]--
+
+Tab:AddButton({
+    Name = "God Mode",
+    Callback = function()
+        local character = player.Character
+        local humanoid = character:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.MaxHealth = math.huge
+            humanoid.Health = humanoid.MaxHealth
+        end
+
+        OrionLib:MakeNotification({
+            Name = "God Mode Activated",
+            Content = "You are now invincible!",
+            Image = "rbxassetid://4483345998",
+            Time = 5
+        })
+    end
+})
+
+--[[================= Invisibility =================]]--
+
+Tab:AddButton({
+    Name = "Invisibility",
+    Callback = function()
+        local character = player.Character
+        for _, v in pairs(character:GetChildren()) do
+            if v:IsA("BasePart") then
+                v.Transparency = 1
+            end
+        end
+
+        OrionLib:MakeNotification({
+            Name = "Invisibility",
+            Content = "You are now invisible!",
+            Image = "rbxassetid://4483345998",
+            Time = 5
+        })
+    end
+})
+
+--[[================= Speed Boost =================]]--
+
+Tab:AddButton({
+    Name = "Speed Boost",
+    Callback = function()
+        local humanoid = player.Character:FindFirstChild("Humanoid")
+        humanoid.WalkSpeed = 200
+
+        OrionLib:MakeNotification({
+            Name = "Speed Boost",
+            Content = "Your speed has been increased!",
+            Image = "rbxassetid://4483345998",
+            Time = 5
+        })
+    end
+})
+
+--[[================= Teleport to Players =================]]--
+
+Tab:AddButton({
+    Name = "Teleport to Player",
+    Callback = function()
+        local playerList = {}
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr ~= player then
+                table.insert(playerList, plr.Name)
+            end
+        end
+
+        local dropdown = Tab:AddDropdown({
+            Name = "Select Player",
+            Options = playerList,
+            Callback = function(selected)
+                local target = game.Players:FindFirstChild(selected)
+                if target and target.Character then
+                    local character = player.Character
+                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                    if humanoidRootPart then
+                        humanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+                    end
+                end
+            end
+        })
+    end
+})
+
+--[[================= Low Gravity =================]]--
+
+Tab:AddButton({
+    Name = "Low Gravity",
+    Callback = function()
+        game.Workspace.Gravity = 10
+
+        OrionLib:MakeNotification({
+            Name = "Low Gravity",
+            Content = "Gravity is now low!",
+            Image = "rbxassetid://4483345998",
+            Time = 5
+        })
+    end
+})
